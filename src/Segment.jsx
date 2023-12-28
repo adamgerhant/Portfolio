@@ -576,7 +576,7 @@ const Segment = ({preset}) =>{
                             </div>
                             )
                         }
-                        if(key=="usage"){
+                        if(key=="usage"&&project[key]){
                             return(
                             <div key={index} className="flex items-center my-4 px-6">
                                 <p className="text-2xl w-[110px] shrink-0">Usage</p>
@@ -584,7 +584,7 @@ const Segment = ({preset}) =>{
                             </div>
                             )
                         }
-                        if(key=="stack"){
+                        if(key=="stack"&&project[key]){
                             return(
                             <div key={index} className="flex items-center my-4 px-6">
                                 <p className="text-2xl w-[110px] shrink-0">Stack</p>
