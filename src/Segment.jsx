@@ -420,6 +420,8 @@ const Segment = ({preset}) =>{
                 }).then(response=>{
                     console.log(response)
                     setResponse(response)
+                }).catch(err=>{
+                    console.log(err)
                 })
         }
         
@@ -584,7 +586,7 @@ const Segment = ({preset}) =>{
                             </div>
                             )
                         }
-                        if(key=="stack"&&project[key]){
+                        if(key=="stack"&&project[key]?.items.length>0){
                             return(
                             <div key={index} className="flex items-center my-4 px-6">
                                 <p className="text-2xl w-[110px] shrink-0">Stack</p>
