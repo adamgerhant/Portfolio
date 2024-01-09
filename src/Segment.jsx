@@ -64,7 +64,7 @@ const getRequestFromPreset = (preset)=>{
                         createdAt:{selected:false},
                         updatedAt:{selected:false},
                     },
-                    createdAt:{selected:false},
+                    createdAt:{selected:true},
                     updatedAt:{selected:false},
                 },
                 createdAt:{selected:false},
@@ -551,7 +551,7 @@ const Segment = ({preset}) =>{
                     })
                 }
                 if(firstKey=="getWebApplications"){
-                    return (response.data.getWebApplications.projects.items.map(project=>(Object.keys(project).map((key, index)=>{
+                    return (response.data.getWebApplications.projects.items.sort((a, b) => a.createdAt.localeCompare(b.createdAt)).map(project=>(Object.keys(project).map((key, index)=>{
                         if(key=="name"){
                             return(
                             <div key={index} className="flex items-center my-4 px-6">
