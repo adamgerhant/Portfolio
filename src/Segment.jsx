@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { AiFillCaretRight } from "react-icons/ai";
+import { AiFillCaretDown, AiFillCaretRight } from "react-icons/ai";
 import { generateClient } from 'aws-amplify/api';
 import { FaGithub, FaLinkedin } from "react-icons/fa";
 import { AiFillMediumCircle } from "react-icons/ai";
@@ -11,10 +11,11 @@ const client = generateClient();
 
 const getRequestFromPreset = (preset)=>{
         return(
-            {getAbout:{
+            {
+            getAbout:{
                 selected:preset=="about"?true:false, 
                 variables:{aboutId:"cec6f8d0-e98a-4b33-8461-4c91d7efae83"}, 
-                id:{selected:preset=="about"?true:false},
+                id:{selected:false},
                 Title:{selected:preset=="about"?true:false},
                 Portrait:{
                     selected: preset=="about"?true:false, 
@@ -40,7 +41,7 @@ const getRequestFromPreset = (preset)=>{
             getWebApplications:{
                 selected:preset=="webapps"?true:false,
                 variables:{webApplicationsId:"ce64e9ce-cc65-4677-bf37-b2da84f8793a"},
-                id:{selected:preset=="webapps"?true:false},
+                id:{selected:false},
                 description: {selected:false},
                 projects:{ 
                     selected:preset=="webapps"?true:false,
@@ -99,7 +100,7 @@ const getRequestFromPreset = (preset)=>{
             getCPP:{
                 selected:preset=="c++"?true:false,
                 variables:{CPPId:"ffb0bcb2-cdcd-45f3-b051-642568fa7a16"},
-                id:{selected:preset=="c++"?true:false},
+                id:{selected:false},
                 description:{selected:false},
                 projects:{
                     selected:preset=="c++"?true:false,
@@ -132,7 +133,7 @@ const getRequestFromPreset = (preset)=>{
             getPrinting:{
                 selected:preset=="3d"?true:false,
                 variables:{printingId:"e203e59b-e6f3-4ca1-b92e-44c7331f952d"},
-                id:{selected:preset=="3d"?true:false},
+                id:{selected:false},
                 description:{selected:true},
                 projects:{
                     selected:preset=="3d"?true:false,
@@ -401,48 +402,84 @@ const ImageSlider = ({images}) =>{
 const Segment = ({preset}) =>{
     const [editTab, setEditTab] = useState("Request")
     const [response, setResponse] = useState({})
-    const request = getRequestFromPreset(preset)
+    const [request, setRequest] = useState(getRequestFromPreset(preset))
 
-    const requestString = getStringFromRequest(request)
-    const makeRequest = () =>{
+    const makeRequest = async (requestString) =>{
         setResponse({})
         if(requestString){
-            console.log(requestString)
-            client.graphql({
-                query: requestString,
-                variables: {
-                    aboutId: request.getAbout?.variables.aboutId,
-                    webApplicationsId: request.getWebApplications?.variables.webApplicationsId,
-                    experienceId: request.getExperience?.variables.experienceId,
-                    CPPId:  request.getCPP?.variables.CPPId,
-                    printingId: request.getPrinting?.variables.printingId,
-                }
-                }).then(response=>{
-                    console.log(response)
-                    setResponse(response)
-                }).catch(err=>{
-                    console.log(err)
+            try{
+                const response = await client.graphql({
+                    query: requestString,
+                    variables: {
+                        aboutId: request.getAbout?.variables.aboutId,
+                        webApplicationsId: request.getWebApplications?.variables.webApplicationsId,
+                        experienceId: request.getExperience?.variables.experienceId,
+                        CPPId:  request.getCPP?.variables.CPPId,
+                        printingId: request.getPrinting?.variables.printingId,
+                    }
                 })
+                setResponse(response)
+
+            }
+            catch (err) {
+                setResponse(err)
+                console.log(err)
+            }
         }
-        
     }
 
     useEffect(()=>{
-        makeRequest()
+        setRequest(getRequestFromPreset(preset))
+        makeRequest(getStringFromRequest(getRequestFromPreset(preset)))
     },[preset])
 
+    const renderNode = (node, path)=>{
+        return(
+            <div className="ml-5 ">
+                {Object.keys(node).map((key, index)=>{
+                    if(key=="variables"){
+                        return(<div className="no-wrap">Variables: {JSON.stringify(node[key])}</div>)
+                    }
+                    else if(key!="selected"){
+                        return(
+                            <div>
+                                <div className="text-white flex items-center cursor-pointer" key={index} onClick={()=>setRequest(prevRequest=>{
+                                    const newObj = {...prevRequest}
+                                    let currentNode = newObj
+                                    path.forEach(pathKey=>{
+                                        currentNode = currentNode[pathKey]
+                                    })
+                                    currentNode[key].selected = !currentNode[key].selected
+                                    return newObj
+                                })}>
+                                    {Object.keys(node[key]).length>1&&(node[key].selected?<AiFillCaretDown className="w-[15px] h-[15px]" />:<AiFillCaretRight className="w-[15px] h-[15px]"/>)}
+                                    {Object.keys(node[key]).length==1&&<input type="checkbox" checked={node[key].selected}/>}
+                                    <p className="ml-1">{key}</p>
+
+                                </div>
+
+                                {node[key].selected&&renderNode(node[key], [...path, key])}
+                            </div> 
+                        )
+                    }
+                })
+                }
+            </div>
+            
+        )
+        
+    }
     
     const responseText = JSON.stringify(response, null, 2)
-
     return( 
         <div className="px-20 p-10 w-full flex">
-            <div className={`${preset=="about"?"h-[400px]":"min-h-[530px]"} w-[40%] flex-1 flex shrink-0 rounded border border-white shadow-[0_0_10px_0px_rgba(255,255,255,0.25)]`}>
-                <div className="text-white w-1/2 relative flex flex-col">
+            <div className={`${preset=="about"?"h-[400px]":"min-h-[530px]"} w-[40%] flex shrink-0 rounded border border-white shadow-[0_0_10px_0px_rgba(255,255,255,0.25)]`}>
+                <div className="text-white w-[45%] relative flex flex-col">
                     <div className="text-xl border-b b-white flex items-center ">
-                        <div className={`px-2 py-1 w-1/2 text-center cursor-pointer ${editTab=="Request"?"bg-white text-slate-950 font-semibold":""}`} onClick={()=>setEditTab("Request")}>
+                        <div className={`px-2 py-1 w-1/2 text-[18px] text-center cursor-pointer ${editTab=="Request"?"bg-white text-slate-950 font-semibold":""}`} onClick={()=>setEditTab("Request")}>
                             Request preview
                         </div>
-                        <div className={`px-2 py-1 w-1/2 text-center cursor-pointer  border-white ${editTab=="Editor"?"bg-white text-slate-950 font-semibold border-r":""}`} onClick={()=>setEditTab("Editor")}>
+                        <div className={`px-2 py-1 w-1/2 text-[18px] text-center cursor-pointer  border-white ${editTab=="Editor"?"bg-white text-slate-950 font-semibold border-r":""}`} onClick={()=>setEditTab("Editor")}>
                             Request editor
                         </div>
                     </div>
@@ -451,13 +488,16 @@ const Segment = ({preset}) =>{
                         {//requestString.split('\n').map((line, index)=><div index={index}>{line}</div>)
                         }
                         <pre className="text-sm">
-                            {requestString}
+                            {getStringFromRequest(request)}
                         </pre>
                     </div>
                     }
-                {editTab=="Editor"&&<div className="overflow-y-auto flex-grow flex items-center justify-center">Under construction</div>}
-                    <div className=" w-full bottom-0 cursor-pointer flex items-center justify-center bg-green-500 text-white">
-                        <div className="pl-3 font-semibold text-lg" onClick={()=>makeRequest()}>
+                {editTab=="Editor"&&
+                    <div className="overflow-auto flex-grow items-center justify-center ml-[-10px]">
+                        {renderNode(request, [])}
+                    </div>}
+                    <div className=" w-full bottom-0 cursor-pointer flex items-center justify-center bg-green-500 text-white" onClick={()=>makeRequest(getStringFromRequest(request))}>
+                        <div className="pl-3 font-semibold text-lg" >
                             Send Request
                         </div>
                         <AiFillCaretRight className=" h-[35px] mb-[-3px] ml-1"/>
@@ -467,7 +507,7 @@ const Segment = ({preset}) =>{
                 </div>
                 
                 <div className="flex flex-col text-white border-l border-white flex-grow w-1/2 ">
-                    <div className="text-xl border-b b-white flex items-center justify-center w-full text-center px-2 py-1 ">
+                    <div className="text-[18px] border-b b-white flex items-center justify-center w-full text-center px-2 py-1 ">
                         Response
                     </div>
                     <div className="flex-grow overflow-auto">
@@ -475,7 +515,8 @@ const Segment = ({preset}) =>{
                             <div className="flex items-center justify-center h-full">
                                 Loading...
                             </div>}
-                        {responseText!="{}"&&
+                 
+                        {responseText!="{}"&&!responseText.hasOwnProperty("Error")&&
                             <pre className="text-sm">
                                 {responseText}
                             </pre>
@@ -551,7 +592,7 @@ const Segment = ({preset}) =>{
                     })
                 }
                 if(firstKey=="getWebApplications"){
-                    return (response.data.getWebApplications.projects.items.sort((a, b) => a.createdAt.localeCompare(b.createdAt)).map(project=>(Object.keys(project).map((key, index)=>{
+                    return (response.data.getWebApplications.projects?.items.sort((a, b) => a.createdAt.localeCompare(b.createdAt)).map(project=>(Object.keys(project).map((key, index)=>{
                         if(key=="name"){
                             return(
                             <div key={index} className="flex items-center my-4 px-6">
