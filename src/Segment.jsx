@@ -592,7 +592,7 @@ const Segment = ({preset}) =>{
                     })
                 }
                 if(firstKey=="getWebApplications"){
-                    return (response.data.getWebApplications.projects?.items.sort((a, b) => a.createdAt.localeCompare(b.createdAt)).map(project=>(Object.keys(project).map((key, index)=>{
+                    return (response.data.getWebApplications.projects?.items.sort((a, b) => b.name.localeCompare(a.name)).map(project=>(Object.keys(project).map((key, index)=>{
                         if(key=="name"){
                             return(
                             <div key={index} className="flex items-center my-4 px-6">
@@ -646,7 +646,7 @@ const Segment = ({preset}) =>{
                             return(
                             <div key={index} className="flex items-top my-4 px-6">
                                 <p className="text-2xl w-[110px] shrink-0">Images</p>
-                                <ImageSlider images={project[key]?.items}/>
+                                <ImageSlider images={project[key]?.items.sort((a,b)=>b.icon.localeCompare(a.icon))}/>
                             </div>
                             )
                         }

@@ -27,7 +27,7 @@ function App() {
       </div>
       <div className="w-full px-20 pt-5 flex justify-center">
         <div onClick={()=>setTab("webapps")} className={tab=="webapps"?"rounded-full px-3 py-1 text-xl bg-white text-black font-semibold cursor-pointer mx-3 border border-white":"border border-white mx-3 rounded-full px-3 py-1 text-xl text-white font-semibold cursor-pointer"}>
-          Web apps
+          Web Development
         </div>
         <div onClick={()=>setTab("jobs")} className={tab=="jobs"?"rounded-full px-3 py-1 text-xl bg-white text-black font-semibold cursor-pointer mx-3 border border-white":"border border-white mx-3 rounded-full px-3 py-1 text-xl text-white font-semibold cursor-pointer"}>
           Experience
